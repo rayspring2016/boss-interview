@@ -203,7 +203,7 @@ description: 老板终面准备助手。当用户需要为高管/老板/CEO终�
 
 **交互模式**：Tab 切换，不用手风琴折叠。每次只显示一个模块内容，点击 Tab 标签切换。
 
-**Tab 结构（6个Tab）**：
+**Tab 结构（7个Tab）**：
 
 | Tab ID | 标签文字 | 对应章节 | 默认激活 |
 |--------|---------|---------|---------|
@@ -213,6 +213,7 @@ description: 老板终面准备助手。当用户需要为高管/老板/CEO终�
 | t3 | 聚焦方向 | 第三章 + 第五章操作提示合并 | 否 |
 | t4 | 题 库 | 第四章 | 否 |
 | t5 | 评估框架 | 第六章 | 否 |
+| t6 | 简 历 | 原始简历结构化展示 | 否 |
 
 **Tab 栏 HTML**（紧贴封面下方，sticky）：
 ```html
@@ -223,11 +224,56 @@ description: 老板终面准备助手。当用户需要为高管/老板/CEO终�
   <button class="tab" onclick="showTab('t3',this)">聚焦方向</button>
   <button class="tab" onclick="showTab('t4',this)">题 库</button>
   <button class="tab" onclick="showTab('t5',this)">评估框架</button>
+  <button class="tab" onclick="showTab('t6',this)">简 历</button>
 </div>
 <div class="tab-content">
   <div id="t0" class="pane active">...</div>
   <div id="t1" class="pane">...</div>
   ...
+  <div id="t6" class="pane">...</div>
+</div>
+```
+
+### 简历 Tab 规范（t6）
+
+**目的**：老板在面试过程中可随时切过来翻阅原始简历，不必另开文件。
+
+**渲染方式**：将简历内容解析为结构化 HTML，不用 PDF iframe（保证独立 HTML 离线可用，不依赖文件路径）。
+
+**内容结构**（按原简历提取，保留原文，不添加 HR 分析评论）：
+
+```
+① 顶部姓名栏：姓名 + 当前职位 + 联系方式（如有）
+② 教育背景：时间倒序，每条一行（学校 · 专业 · 学历 · 毕业年份）
+③ 工作经历：时间倒序，每段包含：
+   - 公司名 + 职位 + 在职时间（左对齐 + 右对齐期限）
+   - 工作内容要点（bullet，原文照录，不精简不改写）
+④ 技能 / 证书 / 其他（如有，照搬原文）
+```
+
+**样式要求**：
+```css
+.cv-company  { font-weight:600; color:var(--dark); font-size:14px; }
+.cv-period   { font-family:'JetBrains Mono',monospace; font-size:11px;
+               color:var(--light); float:right; }
+.cv-role     { font-size:12px; color:var(--brand); margin-bottom:6px; }
+.cv-bullet   { font-size:12px; color:var(--mid); padding:3px 0 3px 14px;
+               position:relative; }
+.cv-bullet::before { content:'·'; position:absolute; left:4px;
+                     color:var(--brand); font-size:16px; line-height:1.3; }
+.cv-section-title { font-family:'JetBrains Mono',monospace; font-size:10px;
+                    color:var(--light); letter-spacing:.05em; text-transform:uppercase;
+                    margin:20px 0 8px; }
+.cv-edu-row  { font-size:13px; color:var(--mid); padding:6px 0;
+               border-bottom:1px solid var(--bg-alt); }
+```
+
+**缺简历时的降级处理**：若用户未提供简历原文，t6 内显示：
+```html
+<div style="text-align:center;padding:48px 20px;color:var(--light)">
+  <div style="font-size:36px;margin-bottom:12px">📄</div>
+  <div style="font-size:13px;color:var(--mid)">简历未提供</div>
+  <div style="font-size:11px;margin-top:6px">生成时附上简历文件即可自动填充本页</div>
 </div>
 ```
 
@@ -353,11 +399,12 @@ Step 8：用 present_files 同时分享 HTML 和 docx 两个文件给用户
 - [ ] 第六章评估表 + AI建议 + 否定触发线齐全
 
 **HTML 交互**
-- [ ] Tab 栏 6 个标签，sticky 吸顶，深色背景
+- [ ] Tab 栏 7 个标签，sticky 吸顶，深色背景
 - [ ] 默认激活「核心悬念」Tab（t0）
 - [ ] 点击 Tab 切换内容区（pane 显示/隐藏）
 - [ ] 题库内每道题点击展开详情（小折叠保留）
 - [ ] 候选人速览 Tab 内容详细（含档案/薪酬/动机/成果/亮点/疑虑/前轮评价摘要）
+- [ ] 简历 Tab（t6）：有简历则渲染结构化时间线；无简历则显示降级占位提示
 
 **文件规范**
 - [ ] HTML 样式符合公司风格规范
